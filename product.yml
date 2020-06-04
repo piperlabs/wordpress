@@ -5,22 +5,22 @@ dependencies:
   - name: httpd
     alias: apache
   - php:7
-  - sql:mysql-ce:8.0
+  - name: mariadb
+    alias: sql
 
 var:
   db:
-    name: WordPressDB
-    user: WordPressUser
-    password: WordPressPassword
+    name: wordpressdb
+    user: wordpress
+    password: password
 
 provision:
+  - pkg: rsync
   - url:
       from: https://wordpress.org/latest.tar.gz
-      to: "{{ apache.documentRoot }}"
-      after:
-        inline: mv wordpress/* . && rmdir wordpress
-        directory: "{{ apache.documentRoot }}"
+      after: rsync -avP {{ installDir }}/wordpress/ {{ apache.documentRoot }}/
   - folder: "{{ apache.documentRoot }}/wp-content/upgrade"
+  - folder: "{{ apache.documentRoot }}/wp-content/uploads"
   - shell: init.sh
   - permission:
       paths: "{{ apache.documentRoot }}"
